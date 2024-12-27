@@ -49,7 +49,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-ROOT_URLCONF = "airport_api.urls"
+ROOT_URLCONF = "app.urls"
 
 TEMPLATES = [
     {
