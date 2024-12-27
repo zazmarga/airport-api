@@ -1,2 +1,5 @@
 [flake8]
 ignore = Q000
+exclude =
+    **/migrations/*
+    venv/*
