@@ -1,7 +1,9 @@
-from importlib.metadata import requires
+import pathlib
+import uuid
 
 from django.core.validators import RegexValidator
 from django.db import models
+from django.utils.text import slugify
 
 
 class Country(models.Model):
@@ -17,9 +19,7 @@ class Country(models.Model):
 class City(models.Model):
     name = models.CharField(max_length=63)
     country = models.ForeignKey(
-        Country,
-        on_delete=models.CASCADE,
-        related_name="cities"
+        Country, on_delete=models.CASCADE, related_name="cities"
     )
 
     class Meta:
@@ -38,15 +38,13 @@ class Airport(models.Model):
             RegexValidator(
                 regex="^[A-Z]{3}$",
                 message="Code IATA must be exactly 3 uppercase letters",
-                code="invalid_code_iata"
+                code="invalid_code_iata",
             )
         ],
-        null=False
+        null=False,
     )
     closest_big_city = models.ForeignKey(
-        City,
-        on_delete=models.CASCADE,
-        related_name="airports"
+        City, on_delete=models.CASCADE, related_name="airports"
     )
 
     def __str__(self) -> str:  # noqa: ANN101
@@ -71,3 +69,31 @@ class Crew(models.Model):
 
     def __str__(self) -> str:  # noqa: ANN101
         return f"{self.first_name} {self.last_name}"
+
+
+class AirplaneType(models.Model):
+    name = models.CharField(max_length=63, unique=True)
+
+    class Meta:
+        verbose_name_plural = "airplane types"
+
+    def __str__(self) -> str:  # noqa: ANN101
+        return self.name
+
+
+def logo_image_path(instance: "AirlineCompany", filename: str) -> pathlib.Path:
+    filename = f"{slugify(instance.name)}-{uuid.uuid4()}"
+    filename += pathlib.Path(filename).suffix
+    return pathlib.Path("upload/logos/") / pathlib.Path(filename)
+
+
+class AirlineCompany(models.Model):
+    name = models.CharField(max_length=63)
+    registration_country = models.ForeignKey(Country, on_delete=models.CASCADE)
+    logo = models.ImageField(null=True, blank=True, upload_to=logo_image_path)
+
+    class Meta:
+        verbose_name_plural = "airline companies"
+
+    def __str__(self) -> str:  # noqa: ANN101
+        return f"{self.name} ({self.registration_country.name})"
