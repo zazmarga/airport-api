@@ -1,3 +1,5 @@
+from importlib.metadata import requires
+
 from django.core.validators import RegexValidator
 from django.db import models
 
@@ -53,3 +55,19 @@ class Airport(models.Model):
     @property
     def full_name(self) -> str:  # noqa: ANN101
         return f"{self.cod_iata}: {self.name} ({self.closest_big_city.name})"
+
+
+class Role(models.Model):
+    name = models.CharField(max_length=63, unique=True)
+
+    def __str__(self) -> str:  # noqa: ANN101
+        return self.name
+
+
+class Crew(models.Model):
+    first_name = models.CharField(max_length=63)
+    last_name = models.CharField(max_length=63)
+    role = models.ForeignKey(Role, on_delete=models.CASCADE)
+
+    def __str__(self) -> str:  # noqa: ANN101
+        return f"{self.first_name} {self.last_name}"
