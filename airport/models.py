@@ -16,6 +16,7 @@ class Country(models.Model):
 
     class Meta:
         verbose_name_plural = "countries"
+        ordering = ["name"]
 
     def __str__(self) -> str:
         return self.name
@@ -29,6 +30,7 @@ class City(models.Model):
 
     class Meta:
         verbose_name_plural = "cities"
+        ordering = ["name"]
 
     def __str__(self) -> str:
         return self.name
