@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from airport.models import (
-    Country, City,
+    Country, City, Airport,
 )
 
 
@@ -25,3 +25,18 @@ class CityListSerializer(CitySerializer):
     class Meta:
         model = City
         fields = ("id", "name", "country", )
+
+
+class AirportSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Airport
+        fields = ("id", "name", "cod_iata", "closest_big_city", )
+
+
+class AirportListSerializer(serializers.ModelSerializer):
+    closest_big_city = serializers.CharField(source="closest_big_city.name", read_only=True)
+
+    class Meta:
+        model = Airport
+        fields = ("id", "name", "cod_iata", "closest_big_city", )
