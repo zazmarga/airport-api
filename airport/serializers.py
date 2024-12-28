@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from airport.models import (
-    Country, City, Airport, Role, Crew, AirplaneType, AirlineCompany, Facility,
+    Country, City, Airport, Role, Crew, AirplaneType, AirlineCompany, Facility, Airplane,
 )
 
 
@@ -97,3 +97,42 @@ class FacilitySerializer(serializers.ModelSerializer):
         fields = ("id", "name", )
 
 
+class AirplaneSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Airplane
+        fields = (
+            "id",
+            "name",
+            "rows",
+            "seats_in_row",
+            "capacity",
+            "airplane_type",
+            "airline_company",
+            "facilities",
+        )
+
+
+class AirplaneListSerializer(AirplaneSerializer):
+    airplane_type = serializers.CharField(
+        source="airplane_type.name", read_only=True
+    )
+    airline_company = serializers.CharField(
+        source="airline_company.name", read_only=True
+    )
+    facilities = serializers.SlugRelatedField(
+        many=True, read_only=True, slug_field="name"
+    )
+
+    class Meta:
+        model = Airplane
+        fields = (
+            "id",
+            "name",
+            "rows",
+            "seats_in_row",
+            "capacity",
+            "airplane_type",
+            "airline_company",
+            "facilities",
+        )

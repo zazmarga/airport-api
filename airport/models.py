@@ -83,6 +83,7 @@ class AirplaneType(models.Model):
 
     class Meta:
         verbose_name_plural = "airplane types"
+        ordering = ["name"]
 
     def __str__(self) -> str:
         return self.name
@@ -101,9 +102,11 @@ class AirlineCompany(models.Model):
 
     class Meta:
         verbose_name_plural = "airline companies"
+        ordering = ["name"]
 
     def __str__(self) -> str:
-        return f"{self.name} ({self.registration_country.name})"
+        return self.name
+        # return f"{self.name} ({self.registration_country.name})"
 
 
 class Facility(models.Model):
@@ -111,6 +114,7 @@ class Facility(models.Model):
 
     class Meta:
         verbose_name_plural = "facilities"
+        ordering = ["name"]
 
     def __str__(self) -> str:
         return self.name
