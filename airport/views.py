@@ -1,29 +1,23 @@
-from rest_framework import mixins
+from rest_framework import mixins, viewsets
 from rest_framework.viewsets import GenericViewSet
 
 from airport.models import (
-    Country, City,
+    Country,
+    City,
 )
 from airport.serializers import (
-    CountrySerializer, CitySerializer, CityListSerializer,
+    CountrySerializer,
+    CitySerializer,
+    CityListSerializer,
 )
 
 
-class CountryViewSet(
-    mixins.CreateModelMixin,
-    mixins.ListModelMixin,
-    GenericViewSet,
-):
+class CountryViewSet(viewsets.ModelViewSet):
     queryset = Country.objects.all()
     serializer_class = CountrySerializer
 
 
-class CityViewSet(
-    mixins.CreateModelMixin,
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    GenericViewSet,
-):
+class CityViewSet(viewsets.ModelViewSet):
     queryset = City.objects.all()
     serializer_class = CitySerializer
 
@@ -31,4 +25,9 @@ class CityViewSet(
         if self.action == "list":
             return CityListSerializer
         return CitySerializer
+
+    def get_queryset(self):
+        queryset = self.queryset.select_related("country")
+        return queryset
+
 
