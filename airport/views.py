@@ -6,7 +6,7 @@ from airport.models import (
     City,
     Airport,
     Role,
-    Crew, AirplaneType, AirlineCompany,
+    Crew, AirplaneType, AirlineCompany, Facility,
 )
 from airport.serializers import (
     CountrySerializer,
@@ -17,6 +17,7 @@ from airport.serializers import (
     RoleSerializer,
     CrewSerializer,
     CrewListSerializer, AirplaneTypeSerializer, AirlineCompanySerializer, AirlineCompanyListSerializer,
+    FacilitySerializer,
 )
 
 
@@ -89,3 +90,8 @@ class AirlineCompanyViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         queryset = self.queryset.select_related("registration_country")
         return queryset
+
+
+class FacilityViewSet(viewsets.ModelViewSet):
+    queryset = Facility.objects.all()
+    serializer_class = FacilitySerializer

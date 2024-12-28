@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from airport.models import (
-    Country, City, Airport, Role, Crew, AirplaneType, AirlineCompany,
+    Country, City, Airport, Role, Crew, AirplaneType, AirlineCompany, Facility,
 )
 
 
@@ -35,7 +35,9 @@ class AirportSerializer(serializers.ModelSerializer):
 
 
 class AirportListSerializer(serializers.ModelSerializer):
-    closest_big_city = serializers.CharField(source="closest_big_city.name", read_only=True)
+    closest_big_city = serializers.CharField(
+        source="closest_big_city.name", read_only=True
+    )
 
     class Meta:
         model = Airport
@@ -53,7 +55,7 @@ class CrewSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Crew
-        fields = ("id", "first_name", "last_name", "role" )
+        fields = ("id", "first_name", "last_name", "role", )
 
 
 class CrewListSerializer(CrewSerializer):
@@ -79,8 +81,19 @@ class AirlineCompanySerializer(serializers.ModelSerializer):
 
 
 class AirlineCompanyListSerializer(serializers.ModelSerializer):
-    registration_country = serializers.CharField(source="registration_country.name", read_only=True)
+    registration_country = serializers.CharField(
+        source="registration_country.name", read_only=True
+    )
 
     class Meta:
         model = AirlineCompany
         fields = ("id", "name", "registration_country", "logo", )
+
+
+class FacilitySerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Facility
+        fields = ("id", "name", )
+
+
