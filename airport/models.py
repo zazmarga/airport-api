@@ -87,7 +87,7 @@ def logo_image_path(instance: "AirlineCompany", filename: str) -> pathlib.Path:
     return pathlib.Path("upload/logos/") / pathlib.Path(filename)
 
 
-class AirlineCompany(models.Model):
+class  AirlineCompany(models.Model):
     name = models.CharField(max_length=63)
     registration_country = models.ForeignKey(Country, on_delete=models.CASCADE)
     logo = models.ImageField(null=True, blank=True, upload_to=logo_image_path)
@@ -97,3 +97,31 @@ class AirlineCompany(models.Model):
 
     def __str__(self) -> str:  # noqa: ANN101
         return f"{self.name} ({self.registration_country.name})"
+
+
+class Facility(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+
+    class Meta:
+        verbose_name_plural = "facilities"
+
+    def __str__(self):
+        return self.name
+
+
+class Airplane(models.Model):
+    name = models.CharField(max_length=63)
+    rows = models.IntegerField()
+    seats_in_row = models.IntegerField()
+    airplane_type = models.ForeignKey(AirplaneType, on_delete=models.CASCADE)
+    airline_company = models.ForeignKey(AirlineCompany, on_delete=models.CASCADE)
+    facilities = models.ManyToManyField(
+        Facility, related_name="airplanes", blank=True
+    )
+
+    @property
+    def capacity(self) -> int:
+        return self.rows * self.seats_in_row
+
+    def __str__(self) -> str:
+        return f"{self.name} ({self.airplane_type.name})"
