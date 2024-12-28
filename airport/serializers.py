@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from airport.models import (
-    Country, City, Airport,
+    Country, City, Airport, Role, Crew,
 )
 
 
@@ -40,3 +40,26 @@ class AirportListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Airport
         fields = ("id", "name", "cod_iata", "closest_big_city", )
+
+
+class RoleSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Role
+        fields = ("id", "name", )
+
+
+class CrewSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Crew
+        fields = ("id", "first_name", "last_name", "role" )
+
+
+class CrewListSerializer(CrewSerializer):
+    role = serializers.CharField(source="role.name", read_only=True)
+
+    class Meta:
+        model = Crew
+        fields = ("id", "first_name", "last_name", "role")
+

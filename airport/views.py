@@ -5,6 +5,8 @@ from airport.models import (
     Country,
     City,
     Airport,
+    Role,
+    Crew,
 )
 from airport.serializers import (
     CountrySerializer,
@@ -12,6 +14,9 @@ from airport.serializers import (
     CityListSerializer,
     AirportSerializer,
     AirportListSerializer,
+    RoleSerializer,
+    CrewSerializer,
+    CrewListSerializer,
 )
 
 
@@ -45,4 +50,23 @@ class AirportViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = self.queryset.select_related("closest_big_city")
+        return queryset
+
+
+class RoleViewSet(viewsets.ModelViewSet):
+    queryset = Role.objects.all()
+    serializer_class = RoleSerializer
+
+
+class CrewViewSet(viewsets.ModelViewSet):
+    queryset = Crew.objects.all()
+    serializer_class = CrewSerializer
+
+    def get_serializer_class(self):
+        if self.action == "list":
+            return CrewListSerializer
+        return CrewSerializer
+
+    def get_queryset(self):
+        queryset = self.queryset.select_related("role")
         return queryset
