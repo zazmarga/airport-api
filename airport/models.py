@@ -1,5 +1,8 @@
 import pathlib
 import uuid
+import pytz
+from geopy.geocoders import Nominatim
+from timezonefinder import TimezoneFinder
 
 from django.core.validators import RegexValidator
 from django.db import models
@@ -87,7 +90,7 @@ def logo_image_path(instance: "AirlineCompany", filename: str) -> pathlib.Path:
     return pathlib.Path("upload/logos/") / pathlib.Path(filename)
 
 
-class  AirlineCompany(models.Model):
+class AirlineCompany(models.Model):
     name = models.CharField(max_length=63)
     registration_country = models.ForeignKey(Country, on_delete=models.CASCADE)
     logo = models.ImageField(null=True, blank=True, upload_to=logo_image_path)
@@ -105,7 +108,7 @@ class Facility(models.Model):
     class Meta:
         verbose_name_plural = "facilities"
 
-    def __str__(self):
+    def __str__(self) -> str:  # noqa: ANN101
         return self.name
 
 
@@ -113,15 +116,95 @@ class Airplane(models.Model):
     name = models.CharField(max_length=63)
     rows = models.IntegerField()
     seats_in_row = models.IntegerField()
-    airplane_type = models.ForeignKey(AirplaneType, on_delete=models.CASCADE)
-    airline_company = models.ForeignKey(AirlineCompany, on_delete=models.CASCADE)
+    airplane_type = models.ForeignKey(
+        AirplaneType, on_delete=models.CASCADE
+    )
+    airline_company = models.ForeignKey(
+        AirlineCompany, on_delete=models.CASCADE
+    )
     facilities = models.ManyToManyField(
         Facility, related_name="airplanes", blank=True
     )
 
     @property
-    def capacity(self) -> int:
+    def capacity(self) -> int:  # noqa: ANN101
         return self.rows * self.seats_in_row
 
-    def __str__(self) -> str:
+    def __str__(self) -> str:  # noqa: ANN101
         return f"{self.name} ({self.airplane_type.name})"
+
+
+class Route(models.Model):
+    source = models.ForeignKey(
+        Airport, on_delete=models.CASCADE, related_name="routes"
+    )
+    destination = models.ForeignKey(
+        Airport, on_delete=models.CASCADE, related_name="routes"
+    )
+    distance = models.IntegerField(null=True, blank=True)
+
+    class Meta:
+        indexes = [
+            models.Index(
+                fields=[
+                    "source",
+                    "destination",
+                ]
+            ),
+        ]
+
+    def __str__(self) -> str:  # noqa: ANN101
+        return f"{self.source} - {self.destination}"
+
+
+class Flight(models.Model):
+    name = models.CharField(max_length=24)
+    route = models.ForeignKey(
+        Route, on_delete=models.CASCADE, related_name="flights"
+    )
+    airplane = models.ForeignKey(
+        Airplane, on_delete=models.CASCADE, related_name="flights"
+    )
+    departure_time = models.DateTimeField()
+    arrival_time = models.DateTimeField()
+    crew_members = models.ManyToManyField(Crew, related_name="flights")
+
+    @property
+    def duration(self) -> str:  # noqa: ANN101
+        geolocator = Nominatim(user_agent="flight_duration_calculator")
+        tf = TimezoneFinder()
+        # Getting airport coordinates
+        departure_location = geolocator.geocode(
+            f"{self.route.source.closest_big_city.name}, "
+            f"{self.route.source.closest_big_city.country.name}"
+        )
+        arrival_location = geolocator.geocode(
+            f"{self.route.destination.closest_big_city.name}, "
+            f"{self.route.destination.closest_big_city.country.name}"
+        )
+        # Definition of time zones
+        departure_timezone = pytz.timezone(
+            tf.timezone_at(
+                lat=departure_location.latitude,
+                lng=departure_location.longitude
+            )
+        )
+        arrival_timezone = pytz.timezone(
+            tf.timezone_at(
+                lat=arrival_location.latitude,
+                lng=arrival_location.longitude
+            )
+        )
+        # Convert departure and arrival times to the appropriate time zones
+        departure_time = self.departure_time.astimezone(departure_timezone)
+        arrival_time = self.arrival_time.astimezone(arrival_timezone)
+        # Calculating flight duration in seconds
+        duration = arrival_time - departure_time
+        # Converting flight duration to hours and minutes
+        hours, remainder = divmod(duration.total_seconds(), 3600)
+        minutes, _ = divmod(remainder, 60)
+
+        return f"{int(hours)}h {int(minutes)}m"
+
+    def __str__(self) -> str:  # noqa: ANN101
+        return f"{self.name} ({self.departure_time})"
