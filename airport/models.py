@@ -31,7 +31,8 @@ class City(models.Model):
         ordering = ["name"]
 
     def __str__(self) -> str:
-        return f"{self.name} ({self.country.name})"
+        # return f"{self.name} ({self.country.name})"
+        return self.name
 
 
 class AirportTimeZone(models.Model):
@@ -154,7 +155,7 @@ class Airplane(models.Model):
         return self.rows * self.seats_in_row
 
     def __str__(self) -> str:
-        return f"{self.name} ({self.airplane_type.name})"
+        return self.name
 
 
 class Route(models.Model):

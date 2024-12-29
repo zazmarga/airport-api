@@ -12,7 +12,7 @@ from airport.models import (
     Airplane,
     Route,
     Flight,
-    Order, AirportTimeZone,
+    Order, AirportTimeZone, Ticket,
 )
 from airport.serializers import (
     CountrySerializer,
@@ -35,7 +35,7 @@ from airport.serializers import (
     FlightListSerializer,
     OrderSerializer,
     OrderListSerializer,
-    OrderRetrieveSerializer, AirportTimeZoneSerializer,
+    OrderRetrieveSerializer, AirportTimeZoneSerializer, TicketRetrieveSerializer,
 )
 
 
@@ -68,12 +68,12 @@ class AirportViewSet(viewsets.ModelViewSet):
     serializer_class = AirportSerializer
 
     def get_serializer_class(self):
-        if self.action == "list":
+        if self.action in ("list", "retrieve"):
             return AirportListSerializer
         return AirportSerializer
 
     def get_queryset(self):
-        queryset = self.queryset.select_related("closest_big_city")
+        queryset = self.queryset.select_related("closest_big_city__country", "time_zone")
         return queryset
 
 
@@ -125,7 +125,7 @@ class AirplaneViewSet(viewsets.ModelViewSet):
     serializer_class = AirplaneSerializer
 
     def get_serializer_class(self):
-        if self.action == "list":
+        if self.action in ("list", "retrieve"):
             return AirplaneListSerializer
         return AirplaneSerializer
 
@@ -167,10 +167,16 @@ class FlightViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = self.queryset.select_related(
-            "route__source__closest_big_city__country",
-            "route__destination__closest_big_city__country",
+            "route", "airplane",
+            "route__source",
+            "route__destination",
+            "route__source__closest_big_city",
+            "route__source__time_zone",
+            "route__destination__time_zone",
+            "route__destination__closest_big_city",
             "airplane__airplane_type",
-            "airplane__airline_company",
+            "airplane__airline_company__registration_country",
+
         )
         queryset = queryset.prefetch_related("crew_members__role")
         return queryset
@@ -178,7 +184,11 @@ class FlightViewSet(viewsets.ModelViewSet):
 
 class OrderViewSet(viewsets.ModelViewSet):
     queryset = Order.objects.select_related(
+        "user", "tickets",
         "tickets__flight",
+        "tickets__flight__airplane",
+        "tickets__flight__route__source",
+        "tickets__flight__route__destination",
     )
     serializer_class = OrderSerializer
 
