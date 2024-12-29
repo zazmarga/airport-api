@@ -1,8 +1,5 @@
 import pathlib
 import uuid
-import pytz
-from geopy.geocoders import Nominatim
-from timezonefinder import TimezoneFinder
 
 from django.core.validators import RegexValidator
 from django.db import models
@@ -72,10 +69,14 @@ class Role(models.Model):
 class Crew(models.Model):
     first_name = models.CharField(max_length=63)
     last_name = models.CharField(max_length=63)
-    role = models.ForeignKey(Role, on_delete=models.CASCADE)
+    role = models.ForeignKey(Role, on_delete=models.CASCADE, related_name="crews")
 
     def __str__(self) -> str:
         return f"{self.first_name} {self.last_name}"
+
+    @property
+    def full_name(self) -> str:
+        return f"{self.first_name} {self.last_name}: {self.role.name}"
 
 
 class AirplaneType(models.Model):
@@ -106,7 +107,6 @@ class AirlineCompany(models.Model):
 
     def __str__(self) -> str:
         return self.name
-        # return f"{self.name} ({self.registration_country.name})"
 
 
 class Facility(models.Model):
@@ -176,43 +176,6 @@ class Flight(models.Model):
     departure_time = models.DateTimeField()
     arrival_time = models.DateTimeField()
     crew_members = models.ManyToManyField(Crew, related_name="flights")
-
-    @property
-    def duration(self) -> str:
-        geolocator = Nominatim(user_agent="flight_duration_calculator")
-        tf = TimezoneFinder()
-        # Getting airport coordinates
-        departure_location = geolocator.geocode(
-            f"{self.route.source.closest_big_city.name}, "
-            f"{self.route.source.closest_big_city.country.name}"
-        )
-        arrival_location = geolocator.geocode(
-            f"{self.route.destination.closest_big_city.name}, "
-            f"{self.route.destination.closest_big_city.country.name}"
-        )
-        # Definition of time zones
-        departure_timezone = pytz.timezone(
-            tf.timezone_at(
-                lat=departure_location.latitude,
-                lng=departure_location.longitude
-            )
-        )
-        arrival_timezone = pytz.timezone(
-            tf.timezone_at(
-                lat=arrival_location.latitude,
-                lng=arrival_location.longitude
-            )
-        )
-        # Convert departure and arrival times to the appropriate time zones
-        departure_time = self.departure_time.astimezone(departure_timezone)
-        arrival_time = self.arrival_time.astimezone(arrival_timezone)
-        # Calculating flight duration in seconds
-        duration = arrival_time - departure_time
-        # Converting flight duration to hours and minutes
-        hours, remainder = divmod(duration.total_seconds(), 3600)
-        minutes, _ = divmod(remainder, 60)
-
-        return f"{int(hours)}h {int(minutes)}m"
 
     def __str__(self) -> str:
         return f"{self.name} ({self.departure_time})"
