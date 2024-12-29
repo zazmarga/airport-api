@@ -181,19 +181,6 @@ class Flight(models.Model):
         return f"{self.name} ({self.departure_time})"
 
 
-class Order(models.Model):
-    created_at = models.DateTimeField(auto_now_add=True)
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE
-    )
-
-    class Meta:
-        ordering = ["-created_at"]
-
-    def __str__(self) -> str:
-        return str(self.created_at)
-
-
 class Ticket(models.Model):
     row = models.IntegerField()
     seat = models.CharField(max_length=1)
@@ -201,7 +188,7 @@ class Ticket(models.Model):
         Flight, on_delete=models.CASCADE, related_name="tickets"
     )
     order = models.ForeignKey(
-        Order, on_delete=models.CASCADE, related_name="tickets"
+        "Order", on_delete=models.CASCADE, related_name="tickets"
     )
 
     class Meta:
@@ -252,3 +239,16 @@ class Ticket(models.Model):
     def save(self, *args, **kwargs):
         self.full_clean()
         return super(Ticket, self).save(*args, **kwargs)
+
+
+class Order(models.Model):
+    created_at = models.DateTimeField(auto_now_add=True)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE
+    )
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self) -> str:
+        return str(self.created_at)
