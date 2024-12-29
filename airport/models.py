@@ -1,6 +1,8 @@
 import pathlib
 import uuid
+from datetime import datetime
 
+import pytz
 from django.core.validators import RegexValidator
 from django.db import models
 from django.utils.text import slugify
@@ -33,6 +35,13 @@ class City(models.Model):
         return f"{self.name} ({self.country.name})"
 
 
+class AirportTimeZone(models.Model):
+    name = models.CharField(max_length=63)
+
+    def __str__(self):
+        return self.name
+
+
 class Airport(models.Model):
     name = models.CharField(max_length=100)
     cod_iata = models.CharField(
@@ -50,6 +59,7 @@ class Airport(models.Model):
     closest_big_city = models.ForeignKey(
         City, on_delete=models.CASCADE, related_name="airports"
     )
+    time_zone = models.ForeignKey(AirportTimeZone, on_delete=models.CASCADE, related_name="airports")
 
     def __str__(self) -> str:
         return self.cod_iata
@@ -176,9 +186,33 @@ class Flight(models.Model):
     departure_time = models.DateTimeField()
     arrival_time = models.DateTimeField()
     crew_members = models.ManyToManyField(Crew, related_name="flights")
+    departure_time_utc = models.DateTimeField(editable=False)
+    arrival_time_utc = models.DateTimeField(editable=False)
+
+    def save(self, *args, **kwargs):
+        departure_time_utc = self.departure_time.replace(
+                tzinfo=pytz.timezone(self.route.source.time_zone.name)
+            )
+        arrival_time_utc = self.arrival_time.replace(
+                tzinfo=pytz.timezone(self.route.destination.time_zone.name)
+            )
+        self.departure_time_utc = departure_time_utc.astimezone(pytz.utc)
+        self.arrival_time_utc = arrival_time_utc.astimezone(pytz.utc)
+        super().save(*args, **kwargs)
+
+    @property
+    def duration(self) -> str:
+        if self.departure_time_utc and self.arrival_time_utc:
+            duration = self.arrival_time_utc - self.departure_time_utc
+
+            hours, remainder = divmod(duration.total_seconds(), 3600)
+            minutes, _ = divmod(remainder, 60)
+
+            return f"{int(hours)}h {int(minutes)}m"
+        return "Duration not available"
 
     def __str__(self) -> str:
-        return f"{self.name} ({self.departure_time})"
+        return self.name
 
 
 class Ticket(models.Model):
@@ -216,7 +250,7 @@ class Ticket(models.Model):
                 {
                     "seat": "seat must be indicated by a letter "
                     f"from the set {seats_set}, "
-                    f"not seat={seat}\n",
+                    f"not seat={seat}",
                 }
             )
         if not (1 <= row <= num_rows):
@@ -224,7 +258,7 @@ class Ticket(models.Model):
                 {
                     "row": "number must be in available range: "
                     f"1 to {num_rows}, "
-                    f"not row={row}\n",
+                    f"not row={row}",
                 }
             )
 
