@@ -59,7 +59,7 @@ class Airport(models.Model):
 
     @property
     def full_name(self) -> str:
-        return f"{self.cod_iata}: {self.name} ({self.closest_big_city.name})"
+        return f"{self.cod_iata}: {self.name} ({self.closest_big_city.name} - {self.closest_big_city.country.name})"
 
 
 class Role(models.Model):

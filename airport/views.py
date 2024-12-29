@@ -6,7 +6,7 @@ from airport.models import (
     City,
     Airport,
     Role,
-    Crew, AirplaneType, AirlineCompany, Facility, Airplane,
+    Crew, AirplaneType, AirlineCompany, Facility, Airplane, Route,
 )
 from airport.serializers import (
     CountrySerializer,
@@ -17,7 +17,7 @@ from airport.serializers import (
     RoleSerializer,
     CrewSerializer,
     CrewListSerializer, AirplaneTypeSerializer, AirlineCompanySerializer, AirlineCompanyListSerializer,
-    FacilitySerializer, AirplaneSerializer, AirplaneListSerializer,
+    FacilitySerializer, AirplaneSerializer, AirplaneListSerializer, RouteSerializer, RouteListSerializer,
 )
 
 
@@ -113,4 +113,21 @@ class AirplaneViewSet(viewsets.ModelViewSet):
             "airline_company__registration_country",
         )
         queryset = queryset.prefetch_related("facilities")
+        return queryset
+
+
+class RouteViewSet(viewsets.ModelViewSet):
+    queryset = Route.objects.all()
+    serializer_class = RouteSerializer
+
+    def get_serializer_class(self):
+        if self.action == "list" or self.action == "retrieve":
+            return RouteListSerializer
+        return RouteSerializer
+
+    def get_queryset(self):
+        queryset = Route.objects.select_related(
+            "source__closest_big_city__country",
+            "destination__closest_big_city__country",
+        )
         return queryset
