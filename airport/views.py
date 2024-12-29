@@ -1,12 +1,17 @@
-from rest_framework import mixins, viewsets
-from rest_framework.viewsets import GenericViewSet
+from rest_framework import viewsets
 
 from airport.models import (
     Country,
     City,
     Airport,
     Role,
-    Crew, AirplaneType, AirlineCompany, Facility, Airplane, Route,
+    Crew,
+    AirplaneType,
+    AirlineCompany,
+    Facility,
+    Airplane,
+    Route,
+    Flight,
 )
 from airport.serializers import (
     CountrySerializer,
@@ -16,8 +21,17 @@ from airport.serializers import (
     AirportListSerializer,
     RoleSerializer,
     CrewSerializer,
-    CrewListSerializer, AirplaneTypeSerializer, AirlineCompanySerializer, AirlineCompanyListSerializer,
-    FacilitySerializer, AirplaneSerializer, AirplaneListSerializer, RouteSerializer, RouteListSerializer,
+    CrewListSerializer,
+    AirplaneTypeSerializer,
+    AirlineCompanySerializer,
+    AirlineCompanyListSerializer,
+    FacilitySerializer,
+    AirplaneSerializer,
+    AirplaneListSerializer,
+    RouteSerializer,
+    RouteListSerializer,
+    FlightSerializer,
+    FlightListSerializer,
 )
 
 
@@ -121,13 +135,33 @@ class RouteViewSet(viewsets.ModelViewSet):
     serializer_class = RouteSerializer
 
     def get_serializer_class(self):
-        if self.action == "list" or self.action == "retrieve":
+        if self.action in ("list", "retrieve"):
             return RouteListSerializer
         return RouteSerializer
 
     def get_queryset(self):
-        queryset = Route.objects.select_related(
+        queryset = self.queryset.select_related(
             "source__closest_big_city__country",
             "destination__closest_big_city__country",
         )
+        return queryset
+
+
+class FlightViewSet(viewsets.ModelViewSet):
+    queryset = Flight.objects.all()
+    serializer_class = FlightSerializer
+
+    def get_serializer_class(self):
+        if self.action in ("list", "retrieve"):
+            return FlightListSerializer
+        return FlightSerializer
+
+    def get_queryset(self):
+        queryset = self.queryset.select_related(
+            "route__source__closest_big_city__country",
+            "route__destination__closest_big_city__country",
+            "airplane__airplane_type",
+            "airplane__airline_company",
+        )
+        queryset = queryset.prefetch_related("crew_members__role")
         return queryset

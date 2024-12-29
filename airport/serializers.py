@@ -1,7 +1,17 @@
 from rest_framework import serializers
 
 from airport.models import (
-    Country, City, Airport, Role, Crew, AirplaneType, AirlineCompany, Facility, Airplane, Route,
+    Country,
+    City,
+    Airport,
+    Role,
+    Crew,
+    AirplaneType,
+    AirlineCompany,
+    Facility,
+    Airplane,
+    Route,
+    Flight,
 )
 
 
@@ -32,7 +42,6 @@ class AirportSerializer(serializers.ModelSerializer):
     class Meta:
         model = Airport
         fields = ("id", "name", "cod_iata", "closest_big_city", )
-
 
 
 class AirportListSerializer(serializers.ModelSerializer):
@@ -147,9 +156,58 @@ class RouteSerializer(serializers.ModelSerializer):
 
 
 class RouteListSerializer(serializers.ModelSerializer):
-    source = serializers.CharField(source="source.full_name", read_only=True)
-    destination = serializers.CharField(source="destination.full_name", read_only=True)
+    source = serializers.CharField(
+        source="source.full_name", read_only=True
+    )
+    destination = serializers.CharField(
+        source="destination.full_name", read_only=True
+    )
 
     class Meta:
         model = Route
         fields = ("id", "source", "destination", "distance",)
+
+
+class FlightSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Flight
+        fields = (
+            "id",
+            "name",
+            "route",
+            "airplane",
+            "departure_time",
+            "arrival_time",
+            "crew_members",
+        )
+
+
+class FlightListSerializer(serializers.ModelSerializer):
+    source = serializers.CharField(
+        source="route.source.closest_big_city", read_only=True
+    )
+    destination = serializers.CharField(
+        source="route.destination.closest_big_city", read_only=True
+    )
+    airplane_name = serializers.CharField(
+        source="airplane.name", read_only=True
+    )
+    crew_members = serializers.SlugRelatedField(
+        many=True, read_only=True, slug_field="full_name"
+    )
+
+    class Meta:
+        model = Flight
+        fields = (
+            "id",
+            "name",
+            "route",
+            "source",
+            "destination",
+            "airplane",
+            "airplane_name",
+            "departure_time",
+            "arrival_time",
+            "crew_members",
+        )
