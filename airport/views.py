@@ -11,7 +11,8 @@ from airport.models import (
     Facility,
     Airplane,
     Route,
-    Flight, Order,
+    Flight,
+    Order, AirportTimeZone,
 )
 from airport.serializers import (
     CountrySerializer,
@@ -34,7 +35,7 @@ from airport.serializers import (
     FlightListSerializer,
     OrderSerializer,
     OrderListSerializer,
-    OrderRetrieveSerializer,
+    OrderRetrieveSerializer, AirportTimeZoneSerializer,
 )
 
 
@@ -55,6 +56,11 @@ class CityViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         queryset = self.queryset.select_related("country")
         return queryset
+
+
+class AirportTimeZoneViewSet(viewsets.ModelViewSet):
+    queryset = AirportTimeZone.objects.all()
+    serializer_class = AirportTimeZoneSerializer
 
 
 class AirportViewSet(viewsets.ModelViewSet):

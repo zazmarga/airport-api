@@ -13,12 +13,13 @@ from airport.views import (
     AirplaneViewSet,
     RouteViewSet,
     FlightViewSet,
-    OrderViewSet,
+    OrderViewSet, AirportTimeZoneViewSet,
 )
 
 router = routers.DefaultRouter()
 router.register("countries", CountryViewSet)
 router.register("cities", CityViewSet)
+router.register("time_zones", AirportTimeZoneViewSet)
 router.register("airports", AirportViewSet)
 router.register("roles", RoleViewSet)
 router.register("crews", CrewViewSet)

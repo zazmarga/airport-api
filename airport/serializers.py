@@ -16,7 +16,7 @@ from airport.models import (
     Route,
     Flight,
     Ticket,
-    Order,
+    Order, AirportTimeZone,
 )
 
 
@@ -42,21 +42,31 @@ class CityListSerializer(CitySerializer):
         fields = ("id", "name", "country", )
 
 
+class AirportTimeZoneSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AirportTimeZone
+        fields = ("id", "name", )
+
+
 class AirportSerializer(serializers.ModelSerializer):
+    time_zone = AirportTimeZoneSerializer
 
     class Meta:
         model = Airport
-        fields = ("id", "name", "cod_iata", "closest_big_city", )
+        fields = ("id", "name", "cod_iata", "closest_big_city", "time_zone", )
 
 
 class AirportListSerializer(serializers.ModelSerializer):
     closest_big_city = serializers.CharField(
         source="closest_big_city.name", read_only=True
     )
+    time_zone = serializers.CharField(
+        source="time_zone.name", read_only=True
+    )
 
     class Meta:
         model = Airport
-        fields = ("id", "name", "cod_iata", "closest_big_city", )
+        fields = ("id", "name", "cod_iata", "closest_big_city", "time_zone",)
 
 
 class RoleSerializer(serializers.ModelSerializer):
@@ -174,7 +184,6 @@ class RouteListSerializer(serializers.ModelSerializer):
 
 
 class FlightSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Flight
         fields = (
@@ -184,11 +193,12 @@ class FlightSerializer(serializers.ModelSerializer):
             "airplane",
             "departure_time",
             "arrival_time",
+            "duration",
             "crew_members",
         )
 
 
-class FlightListSerializer(serializers.ModelSerializer):
+class FlightListSerializer(FlightSerializer):
     source = serializers.CharField(
         source="route.source.closest_big_city", read_only=True
     )
@@ -214,6 +224,7 @@ class FlightListSerializer(serializers.ModelSerializer):
             "airplane_name",
             "departure_time",
             "arrival_time",
+            "duration",
             "crew_members",
         )
 
@@ -232,6 +243,7 @@ class FlightRetrieveSerializer(FlightListSerializer):
             "airplane_name",
             "departure_time",
             "arrival_time",
+            "duration",
         )
 
 

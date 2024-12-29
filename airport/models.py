@@ -1,6 +1,5 @@
 import pathlib
 import uuid
-from datetime import datetime
 
 import pytz
 from django.core.validators import RegexValidator
@@ -38,7 +37,7 @@ class City(models.Model):
 class AirportTimeZone(models.Model):
     name = models.CharField(max_length=63)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
 
@@ -59,14 +58,18 @@ class Airport(models.Model):
     closest_big_city = models.ForeignKey(
         City, on_delete=models.CASCADE, related_name="airports"
     )
-    time_zone = models.ForeignKey(AirportTimeZone, on_delete=models.CASCADE, related_name="airports")
+    time_zone = models.ForeignKey(
+        AirportTimeZone, on_delete=models.CASCADE, related_name="airports"
+    )
 
     def __str__(self) -> str:
         return self.cod_iata
 
     @property
     def full_name(self) -> str:
-        return f"{self.cod_iata}: {self.name} ({self.closest_big_city.name} - {self.closest_big_city.country.name})"
+        return (f"{self.cod_iata}: {self.name} "
+                f"({self.closest_big_city.name} - "
+                f"{self.closest_big_city.country.name})")
 
 
 class Role(models.Model):
@@ -79,7 +82,9 @@ class Role(models.Model):
 class Crew(models.Model):
     first_name = models.CharField(max_length=63)
     last_name = models.CharField(max_length=63)
-    role = models.ForeignKey(Role, on_delete=models.CASCADE, related_name="crews")
+    role = models.ForeignKey(
+        Role, on_delete=models.CASCADE, related_name="crews"
+    )
 
     def __str__(self) -> str:
         return f"{self.first_name} {self.last_name}"
@@ -191,11 +196,11 @@ class Flight(models.Model):
 
     def save(self, *args, **kwargs):
         departure_time_utc = self.departure_time.replace(
-                tzinfo=pytz.timezone(self.route.source.time_zone.name)
-            )
+            tzinfo=pytz.timezone(self.route.source.time_zone.name)
+        )
         arrival_time_utc = self.arrival_time.replace(
-                tzinfo=pytz.timezone(self.route.destination.time_zone.name)
-            )
+            tzinfo=pytz.timezone(self.route.destination.time_zone.name)
+        )
         self.departure_time_utc = departure_time_utc.astimezone(pytz.utc)
         self.arrival_time_utc = arrival_time_utc.astimezone(pytz.utc)
         super().save(*args, **kwargs)
