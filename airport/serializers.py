@@ -16,7 +16,8 @@ from airport.models import (
     Route,
     Flight,
     Ticket,
-    Order, AirportTimeZone,
+    Order,
+    AirportTimeZone,
 )
 
 
@@ -66,9 +67,17 @@ class AirportListSerializer(serializers.ModelSerializer):
     country = serializers.CharField(
         source="closest_big_city.country.name", read_only=True
     )
+
     class Meta:
         model = Airport
-        fields = ("id", "name", "cod_iata", "closest_big_city", "country", "time_zone",)
+        fields = (
+            "id",
+            "name",
+            "cod_iata",
+            "closest_big_city",
+            "country",
+            "time_zone",
+        )
 
 
 class RoleSerializer(serializers.ModelSerializer):
@@ -292,11 +301,16 @@ class FlightTicketSerializer(FlightSerializer):
     airplane = serializers.CharField(
         source="airplane.name", read_only=True
     )
+    airline_company = serializers.CharField(
+        source="airplane.airline_company.name", read_only=True
+    )
+
     class Meta:
         model = Flight
         fields = (
             "id",
             "name",
+            "airline_company",
             "route",
             "airplane",
             "departure_time",

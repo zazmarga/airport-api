@@ -13,7 +13,8 @@ from airport.models import (
     Airplane,
     Route,
     Flight,
-    Order, AirportTimeZone, Ticket,
+    Order,
+    AirportTimeZone,
 )
 from airport.serializers import (
     CountrySerializer,
@@ -36,7 +37,8 @@ from airport.serializers import (
     FlightListSerializer,
     OrderSerializer,
     OrderListSerializer,
-    OrderRetrieveSerializer, AirportTimeZoneSerializer, TicketRetrieveSerializer,
+    OrderRetrieveSerializer,
+    AirportTimeZoneSerializer,
 )
 
 
@@ -74,7 +76,9 @@ class AirportViewSet(viewsets.ModelViewSet):
         return AirportSerializer
 
     def get_queryset(self):
-        queryset = self.queryset.select_related("closest_big_city__country", "time_zone")
+        queryset = self.queryset.select_related(
+            "closest_big_city__country", "time_zone"
+        )
         return queryset
 
 
@@ -176,7 +180,9 @@ class FlightViewSet(viewsets.ModelViewSet):
         if self.request.method == "GET":
             airline_companies_ids = self.request.query_params.get("companies")
             if airline_companies_ids:
-                airline_companies_ids = self._params_to_ints(airline_companies_ids)
+                airline_companies_ids = self._params_to_ints(
+                    airline_companies_ids
+                )
                 queryset = queryset.filter(
                     airplane__airline_company__id__in=airline_companies_ids
                 )
@@ -197,7 +203,7 @@ class OrderViewSet(viewsets.ModelViewSet):
     queryset = Order.objects.select_related(
         "user", "tickets",
         "tickets__flight",
-        "tickets__flight__airplane",
+        "tickets__flight__airplane__airline_company__registration_country",
         "tickets__flight__route__source",
         "tickets__flight__route__destination",
     )
