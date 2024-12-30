@@ -1,6 +1,5 @@
 import pathlib
 import uuid
-from datetime import datetime
 
 import pytz
 from django.core.validators import RegexValidator
