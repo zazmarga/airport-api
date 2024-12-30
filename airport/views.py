@@ -1,5 +1,4 @@
-from rest_framework import viewsets, mixins
-from rest_framework.viewsets import GenericViewSet
+from rest_framework import viewsets
 
 from airport.models import (
     Country,
@@ -177,7 +176,9 @@ class FlightViewSet(viewsets.ModelViewSet):
             airline_companies_ids = self.request.query_params.get("companies")
             if airline_companies_ids:
                 airline_companies_ids = self._params_to_ints(airline_companies_ids)
-                queryset = queryset.filter(airplane__airline_company__id__in=airline_companies_ids)
+                queryset = queryset.filter(
+                    airplane__airline_company__id__in=airline_companies_ids
+                )
 
         if self.request.method in ("GET", "POST"):
             queryset = queryset.select_related(
