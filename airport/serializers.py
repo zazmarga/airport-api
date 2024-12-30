@@ -200,7 +200,7 @@ class FlightSerializer(serializers.ModelSerializer):
         )
 
 
-class FlightListSerializer(FlightSerializer):
+class FlightListSerializer(serializers.ModelSerializer):
     source = serializers.CharField(
         source="route.source.closest_big_city", read_only=True
     )

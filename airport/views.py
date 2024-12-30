@@ -1,4 +1,5 @@
-from rest_framework import viewsets
+from rest_framework import viewsets, mixins
+from rest_framework.viewsets import GenericViewSet
 
 from airport.models import (
     Country,
@@ -165,21 +166,29 @@ class FlightViewSet(viewsets.ModelViewSet):
             return FlightListSerializer
         return FlightSerializer
 
-    def get_queryset(self):
-        queryset = self.queryset.select_related(
-            "route", "airplane",
-            "route__source",
-            "route__destination",
-            "route__source__closest_big_city",
-            "route__source__time_zone",
-            "route__destination__time_zone",
-            "route__destination__closest_big_city",
-            "airplane__airplane_type",
-            "airplane__airline_company__registration_country",
+    @staticmethod
+    def _params_to_ints(query_string: str) -> list:
+        return [int(str_id) for str_id in query_string.split(",")]
 
-        )
-        queryset = queryset.prefetch_related("crew_members__role")
-        return queryset
+    def get_queryset(self):
+        queryset = self.queryset
+
+        if self.request.method == "GET":
+            airline_companies_ids = self.request.query_params.get("companies")
+            if airline_companies_ids:
+                airline_companies_ids = self._params_to_ints(airline_companies_ids)
+                queryset = queryset.filter(airplane__airline_company__id__in=airline_companies_ids)
+
+        if self.request.method in ("GET", "POST"):
+            queryset = queryset.select_related(
+                "route__source__closest_big_city",
+                "route__destination__closest_big_city",
+                "airplane__airplane_type",
+                "airplane__airline_company__registration_country",
+            )
+            queryset = queryset.prefetch_related("crew_members__role")
+
+        return queryset.distinct()
 
 
 class OrderViewSet(viewsets.ModelViewSet):
