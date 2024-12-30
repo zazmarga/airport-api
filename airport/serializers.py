@@ -197,6 +197,7 @@ class FlightSerializer(serializers.ModelSerializer):
             "arrival_time",
             "duration",
             "crew_members",
+            "is_completed"
         )
 
 
@@ -228,6 +229,7 @@ class FlightListSerializer(serializers.ModelSerializer):
             "arrival_time",
             "duration",
             "crew_members",
+            "is_completed"
         )
 
 
@@ -246,6 +248,7 @@ class FlightRetrieveSerializer(FlightListSerializer):
             "departure_time",
             "arrival_time",
             "duration",
+            "is_completed"
         )
 
 
@@ -298,7 +301,7 @@ class FlightTicketSerializer(FlightSerializer):
             "airplane",
             "departure_time",
             "arrival_time",
-            "duration",
+            "duration"
         )
 
 

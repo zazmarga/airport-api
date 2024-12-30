@@ -1,4 +1,5 @@
 from rest_framework import viewsets
+from rest_framework.permissions import IsAuthenticated
 
 from airport.models import (
     Country,
@@ -201,6 +202,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         "tickets__flight__route__destination",
     )
     serializer_class = OrderSerializer
+    permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
         return Order.objects.filter(user=self.request.user)
