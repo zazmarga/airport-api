@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 import os
+from datetime import timedelta
 from pathlib import Path
 from dotenv import load_dotenv
 
@@ -145,5 +146,13 @@ INTERNAL_IPS = [
 
 REST_FRAMEWORK = {
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
-    "PAGE_SIZE": 2
+    "PAGE_SIZE": 2,
+
+    "DEFAULT_AUTHENTICATION_CLASSES": "rest_framework_simplejwt.authentication.JWTAuthentication",
+}
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=5),   ## minutes=5
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=30),   ## days=1
+    "ROTATE_REFRESH_TOKENS": False,
 }
