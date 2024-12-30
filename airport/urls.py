@@ -13,7 +13,8 @@ from airport.views import (
     AirplaneViewSet,
     RouteViewSet,
     FlightViewSet,
-    OrderViewSet, AirportTimeZoneViewSet,
+    OrderViewSet,
+    AirportTimeZoneViewSet,
 )
 
 router = routers.DefaultRouter()
