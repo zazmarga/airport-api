@@ -223,12 +223,16 @@ class FlightListSerializer(serializers.ModelSerializer):
     crew_members = serializers.SlugRelatedField(
         many=True, read_only=True, slug_field="full_name"
     )
+    airline_company = serializers.CharField(
+        source="airplane.airline_company.name", read_only=True
+    )
 
     class Meta:
         model = Flight
         fields = (
             "id",
             "name",
+            "airline_company",
             "route",
             "source",
             "destination",

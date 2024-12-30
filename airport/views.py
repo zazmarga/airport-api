@@ -1,3 +1,4 @@
+from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 
@@ -198,6 +199,21 @@ class FlightViewSet(viewsets.ModelViewSet):
 
         return queryset.distinct()
 
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                "companies",
+                type={"type": "list", "items": {"type": "number"}},
+                description="Filter by airline_company id (ex. /?companies=1,3)"
+            )
+        ]
+    )
+    def list(self, request, *args, **kwargs):
+        """
+        Get list of flights (optional: filtered by airline_company
+        """
+        #  This is reflex in api-doc of list flights
+        return super().list(request, *args, **kwargs)
 
 class OrderViewSet(viewsets.ModelViewSet):
     queryset = Order.objects.select_related(
