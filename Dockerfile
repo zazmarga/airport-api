@@ -1,22 +1,18 @@
-FROM python:3.11.6-alpine3.18
+FROM python:3.11-slim
 LABEL maintainer="zazmargo@gmail.com"
 
-ENV PYTHOUNNBUFFERED=1
+ENV PYTHONUNBUFFERED=1
 
 WORKDIR /app
 
 COPY requirements.txt requirements.txt
-RUN pip install -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt && \
+    rm -rf /var/lib/apt/lists/*
 
 COPY . .
-RUN mkdir -p /files/media
-
-RUN adduser \
-    --disabled-password \
-    --no-create-home \
-    my_user
-
-RUN chown -R my_user /files/media
-RUN chmod -R 755 /files/media
+RUN mkdir -p /files/media && \
+    adduser --disabled-password --no-create-home my_user && \
+    chown -R my_user /files/media && \
+    chmod -R 755 /files/media
 
 USER my_user
