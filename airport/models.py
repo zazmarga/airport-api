@@ -1,5 +1,6 @@
 import pathlib
 import uuid
+from datetime import datetime
 
 import pytz
 from django.core.validators import RegexValidator
@@ -194,6 +195,10 @@ class Flight(models.Model):
     crew_members = models.ManyToManyField(Crew, related_name="flights")
     departure_time_utc = models.DateTimeField(editable=False)
     arrival_time_utc = models.DateTimeField(editable=False)
+    is_completed = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ["is_completed", "departure_time"]
 
     def save(self, *args, **kwargs):
         departure_time_utc = self.departure_time.replace(
