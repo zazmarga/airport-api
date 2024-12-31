@@ -28,11 +28,11 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DEBUG")
 
+
 ALLOWED_HOSTS = [
     "127.0.0.1",
     "localhost",
 ]
-
 
 # Application definition
 
@@ -151,7 +151,7 @@ INTERNAL_IPS = [
 
 REST_FRAMEWORK = {
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
-    "PAGE_SIZE": 5,
+    "PAGE_SIZE": 3,
 
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
@@ -161,7 +161,7 @@ REST_FRAMEWORK = {
         "rest_framework.throttling.AnonRateThrottle",
         "rest_framework.throttling.UserRateThrottle",
     ],
-    "DEFAULT_THROTTLE_RATES": {"anon": "100/day", "user": "300/day"},
+    "DEFAULT_THROTTLE_RATES": {"anon": "10/day", "user": "30/day"},
 
     "DEFAULT_PERMISSION_CLASSES": (
         "airport.permissions.IsAdminAllOrIfAuthenticatedReadOnly",
@@ -184,7 +184,6 @@ SPECTACULAR_SETTINGS = {
 }
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(days=5),   ## minutes=5
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=30),   ## days=1
-    "ROTATE_REFRESH_TOKENS": False,
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=5),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
 }
