@@ -1,6 +1,8 @@
 from drf_spectacular.utils import extend_schema, OpenApiParameter
-from rest_framework import viewsets
-from rest_framework.permissions import IsAuthenticated
+from rest_framework import viewsets, status
+from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.response import Response
 
 from airport.models import (
     Country,
@@ -39,7 +41,7 @@ from airport.serializers import (
     OrderSerializer,
     OrderListSerializer,
     OrderRetrieveSerializer,
-    AirportTimeZoneSerializer,
+    AirportTimeZoneSerializer, AirlineCompanyLogoSerializer,
 )
 
 
@@ -109,16 +111,31 @@ class AirplaneTypeViewSet(viewsets.ModelViewSet):
 
 class AirlineCompanyViewSet(viewsets.ModelViewSet):
     queryset = AirlineCompany.objects.all()
-    serializer_class = AirlineCompanySerializer
+    serializer_class = AirlineCompanyListSerializer
 
     def get_serializer_class(self):
-        if self.action == "list":
+        if self.action in ("list", "retrieve", ):
             return AirlineCompanyListSerializer
+        if self.action == "upload_logo":
+            return AirlineCompanyLogoSerializer
         return AirlineCompanySerializer
 
     def get_queryset(self):
         queryset = self.queryset.select_related("registration_country")
         return queryset
+
+    @action(
+        methods=["post", "get"],
+        detail=True,  #  it's working with one instance
+        permission_classes=(IsAdminUser,),  #  not always, if need custom permissions
+        url_path="upload-logo",  # if not write this, its using def-name (this is same)
+    )
+    def upload_logo(self, request, pk=None):
+        airline_company = self.get_object()
+        serializer = self.get_serializer(airline_company, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class FacilityViewSet(viewsets.ModelViewSet):

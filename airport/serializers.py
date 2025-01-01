@@ -113,17 +113,23 @@ class AirlineCompanySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = AirlineCompany
-        fields = ("id", "name", "registration_country", "logo", )
+        fields = ("id", "name", "registration_country",)
 
 
 class AirlineCompanyListSerializer(serializers.ModelSerializer):
     registration_country = serializers.CharField(
         source="registration_country.name", read_only=True
     )
-
     class Meta:
         model = AirlineCompany
         fields = ("id", "name", "registration_country", "logo", )
+
+
+class AirlineCompanyLogoSerializer(serializers.ModelSerializer):
+    name=serializers.CharField(read_only=True)
+    class Meta:
+        model = AirlineCompany
+        fields = ("id", "name", "logo")
 
 
 class FacilitySerializer(serializers.ModelSerializer):
