@@ -126,9 +126,9 @@ class AirlineCompanyViewSet(viewsets.ModelViewSet):
 
     @action(
         methods=["post", "get"],
-        detail=True,  #  it's working with one instance
-        permission_classes=(IsAdminUser,),  #  not always, if need custom permissions
-        url_path="upload-logo",  # if not write this, its using def-name (this is same)
+        detail=True,
+        permission_classes=(IsAdminUser, ),
+        url_path="upload-logo",
     )
     def upload_logo(self, request, pk=None):
         airline_company = self.get_object()
@@ -221,16 +221,18 @@ class FlightViewSet(viewsets.ModelViewSet):
             OpenApiParameter(
                 "companies",
                 type={"type": "list", "items": {"type": "number"}},
-                description="Filter by airline_company id (ex. /?companies=1,3)"
+                description="Filter by airline_company id "
+                            "(ex. /?companies=1,3)"
             )
         ]
     )
     def list(self, request, *args, **kwargs):
         """
-        Get list of flights (optional: filtered by airline_company
+        Get list of flights (optional: filtered by airline_company)
         """
         #  This is reflex in api-doc of list flights
         return super().list(request, *args, **kwargs)
+
 
 class OrderViewSet(viewsets.ModelViewSet):
     queryset = Order.objects.select_related(

@@ -36,7 +36,7 @@ class City(models.Model):
 
 
 class AirportTimeZone(models.Model):
-    name = models.CharField(max_length=63)
+    name = models.CharField(max_length=63, unique=True)
 
     def __str__(self) -> str:
         return self.name
