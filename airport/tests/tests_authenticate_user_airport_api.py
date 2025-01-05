@@ -165,7 +165,9 @@ class AuthenticatedApiTests(TestCase):
     def test_create_airline_company_forbidden(self):
         payload = {
             "name": "Iberica",
-            "registration_country": Country.objects.create(name="Spain"),
+            "registration_country": Country.objects.get_or_create(
+                name="Spain"
+            )[0],
         }
         self.create_instance_forbidden(COMPANY_URL, payload)
 
