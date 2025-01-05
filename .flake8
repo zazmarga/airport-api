@@ -1,0 +1,5 @@
+[flake8]
+ignore = Q000,ANN001,ANN002,ANN003,ANN101,ANN201,ANN205,W503
+exclude =
+    **/migrations/*
+    venv/*
