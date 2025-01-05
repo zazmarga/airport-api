@@ -3,18 +3,87 @@ import tempfile
 from datetime import datetime
 
 from PIL import Image
-from django.db import models
 from django.test import TestCase
-from rest_framework import response, status
+from rest_framework import status
 
 from rest_framework.test import APIClient
 from django.contrib.auth import get_user_model
 
-from airport.models import Country, City, AirportTimeZone, Airport, Facility, AirplaneType, AirlineCompany, Airplane, \
-    Role, Crew, Route, Flight
-from airport.tests.urls_and_sample_functions import COUNTRY_URL, sample_country, CITY_URL, TIMEZONE_URL, \
-    sample_time_zone, AIRPORT_URL, FACILITY_URL, TYPE_URL, COMPANY_URL, sample_type, AIRPLANE_URL, ROLE_URL, \
-    sample_role, CREW_URL, ROUTE_URL, FLIGHT_URL, sample_facility
+from airport.models import (
+    Country,
+    City,
+    AirportTimeZone,
+    Airport,
+    Facility,
+    AirplaneType,
+    AirlineCompany,
+    Airplane,
+    Role,
+    Crew,
+    Route,
+    Flight
+)
+from airport.tests.urls_and_sample_functions import (
+    COUNTRY_URL, sample_country,
+    CITY_URL,
+    TIMEZONE_URL, sample_time_zone,
+    AIRPORT_URL,
+    FACILITY_URL, sample_facility,
+    TYPE_URL, sample_type,
+    COMPANY_URL,
+    AIRPLANE_URL,
+    ROLE_URL, sample_role,
+    CREW_URL,
+    ROUTE_URL,
+    FLIGHT_URL,
+)
+
+
+def sample_flight():
+    airport1 = Airport.objects.create(
+        name="Eseiza",
+        cod_iata="EZE",
+        closest_big_city=City.objects.get_or_create(
+            name="Buenos Aires",
+            country=Country.objects.get_or_create(name="Argentina")[0]
+        )[0],
+        time_zone=sample_time_zone(),
+    )
+    airport2 = Airport.objects.create(
+        name="El Prat",
+        cod_iata="BCN",
+        closest_big_city=City.objects.get_or_create(
+            name="Barcelona",
+            country=Country.objects.get_or_create(name="Spain")[0]
+        )[0],
+        time_zone=sample_time_zone(name="Europe/Madrid"),
+    )
+    airline_company = AirlineCompany.objects.create(
+        name="Aerolineas Argentinas",
+        registration_country=Country.objects.get_or_create(name="Argentina")[0]
+    )
+    airplane = Airplane.objects.create(
+        name="Boeing 747",
+        rows=24,
+        seats_in_row=6,
+        airplane_type=sample_type(),
+        airline_company=airline_company,
+    )
+    crew = Crew.objects.create(
+        first_name="Anna", last_name="Dzen", role=sample_role(),
+    )
+    flight = Flight.objects.create(
+        name="AB - 777",
+        route=Route.objects.create(
+            source=airport1,
+            destination=airport2,
+            distance=10560,
+        ),
+        airplane=airplane,
+        departure_time=datetime(2025, 1, 3, 20, 55, 0, tzinfo=None),
+        arrival_time=datetime(2025, 1, 4, 20, 55, 0, tzinfo=None),
+    )
+    flight.crew_members.add(crew)
 
 
 class AdminApiTests(TestCase):
@@ -27,7 +96,6 @@ class AdminApiTests(TestCase):
         )
         self.client.force_authenticate(user=self.user)
 
-
     def create_instance(self, url, payload, class_instance):
         response = self.client.post(url, payload)
 
@@ -39,7 +107,6 @@ class AdminApiTests(TestCase):
                 self.assertEqual(payload[key], getattr(instance, f"{key}_id"))
             else:
                 self.assertEqual(payload[key], getattr(instance, key))
-
 
     def test_create_country(self):
         payload = {
@@ -165,76 +232,86 @@ class AdminApiTests(TestCase):
         self.create_instance(ROUTE_URL, payload, Route)
 
     def test_create_flight(self):
-        pass
-        # airport1 = Airport.objects.create(
-        #     name="Eseiza",
-        #     cod_iata="EZE",
-        #     closest_big_city=City.objects.get_or_create(
-        #         name="Buenos Aires",
-        #         country=Country.objects.get_or_create(name="Argentina")[0]
-        #     )[0],
-        #     time_zone=sample_time_zone(),
-        # )
-        # airport2 = Airport.objects.create(
-        #     name="El Prat",
-        #     cod_iata="BCN",
-        #     closest_big_city=City.objects.get_or_create(
-        #         name="Barcelona",
-        #         country=Country.objects.get_or_create(name="Spain")[0]
-        #     )[0],
-        #     time_zone=sample_time_zone(name="Europe/Madrid"),
-        # )
-        # airline_company = AirlineCompany.objects.create(
-        #     name="Aerolineas Argentinas",
-        #     registration_country=Country.objects.get_or_create(name="Argentina")[0]
-        # )
-        # airplane = Airplane.objects.create(
-        #     name="Boeing 747",
-        #     rows=24,
-        #     seats_in_row=6,
-        #     airplane_type=sample_type(),
-        #     airline_company=airline_company,
-        # )
-        # crew = Crew.objects.create(
-        #     first_name="Anna", last_name="Dzen", role=sample_role(),
-        # )
-        # payload = {
-        #     "name": "AB - 207",
-        #     "route": Route.objects.create(
-        #         source=airport1,
-        #         destination=airport2,
-        #         distance=10560,
-        #     ).id,
-        #     "airplane": airplane.id,
-        #     "departure_time": datetime(2025, 1, 3, 20, 55, 0, tzinfo=None),
-        #     "arrival_time": datetime(2025, 1, 4, 20, 55, 0, tzinfo=None),
-        #     "crew_members": [crew.id],
-        # }
+        airport1 = Airport.objects.create(
+            name="Eseiza",
+            cod_iata="EZE",
+            closest_big_city=City.objects.get_or_create(
+                name="Buenos Aires",
+                country=Country.objects.get_or_create(name="Argentina")[0]
+            )[0],
+            time_zone=sample_time_zone(),
+        )
+        airport2 = Airport.objects.create(
+            name="El Prat",
+            cod_iata="BCN",
+            closest_big_city=City.objects.get_or_create(
+                name="Barcelona",
+                country=Country.objects.get_or_create(name="Spain")[0]
+            )[0],
+            time_zone=sample_time_zone(name="Europe/Madrid"),
+        )
+        airline_company = AirlineCompany.objects.create(
+            name="Aerolineas Argentinas",
+            registration_country=Country.objects.get_or_create(
+                name="Argentina"
+            )[0]
+        )
+        airplane = Airplane.objects.create(
+            name="Boeing 747",
+            rows=24,
+            seats_in_row=6,
+            airplane_type=sample_type(),
+            airline_company=airline_company,
+        )
+        crew = Crew.objects.create(
+            first_name="Anna", last_name="Dzen", role=sample_role(),
+        )
+        payload = {
+            "name": "AB - 207",
+            "route": Route.objects.create(
+                source=airport1,
+                destination=airport2,
+                distance=10560,
+            ).id,
+            "airplane": airplane.id,
+            "departure_time": datetime(2025, 1, 3, 20, 55, 0, tzinfo=None),
+            "arrival_time": datetime(2025, 1, 4, 20, 55, 0, tzinfo=None),
+            "crew_members": [crew.id],
+        }
 
-    # def create_instance(self, url, payload, class_instance):
-    #     response = self.client.post(url, payload)
-    #
-    #     instance = class_instance.objects.get(pk=response.data["id"])
-    #
-    #     self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-    #     for key in payload.keys():
-    #         if hasattr(instance, f"{key}_id"):
-    #             self.assertEqual(payload[key], getattr(instance, f"{key}_id"))
-    #         else:
-    #             if isinstance(getattr(instance, key), datetime):
-    #                 instance_value = getattr(instance, key).replace(tzinfo=None)
-    #                 payload_value = getattr(instance, key).replace(tzinfo=None)
-    #                 self.assertEqual(payload_value, instance_value)
-    #             elif isinstance(getattr(instance, key), models.Manager):
-    #                 instance_value_ids = list(getattr(instance, key.values_list('id', flat=True)))
-    #                 self.assertEqual(payload[key], instance_value_ids)
-    #             else:
-    #                 self.assertEqual(payload[key], getattr(instance, key))
+        response = self.client.post(FLIGHT_URL, payload)
+        self.flight = Flight.objects.get(pk=response.data["id"])
+        flight = self.flight
 
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        for key in payload.keys():
+            if hasattr(flight, f"{key}_id"):
+                self.assertEqual(payload[key], getattr(flight, f"{key}_id"))
+
+        self.assertEqual(payload["name"], getattr(flight, "name"))
+
+        flight.departure_time = flight.departure_time.replace(tzinfo=None)
+        payload["departure_time"] = payload["departure_time"].replace(
+            tzinfo=None
+        )
+        self.assertEqual(
+            payload["departure_time"], getattr(flight, "departure_time")
+        )
+
+        flight.arrival_time = flight.arrival_time.replace(tzinfo=None)
+        payload["arrival_time"] = payload["arrival_time"].replace(tzinfo=None)
+        self.assertEqual(
+            payload["arrival_time"], getattr(flight, "arrival_time")
+        )
+
+        crews = flight.crew_members.all()
+        self.assertEqual(crews.count(), 1)
+        self.assertIn(crew, crews)
+
+    #  delete forbidden
     def delete_instance_forbidden(self, url, instance):
         response = self.client.delete(url + f"{instance.id}/")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-
 
     def test_delete_country_forbidden(self):
         country = sample_country()
@@ -326,7 +403,8 @@ class AdminApiTests(TestCase):
         self.delete_instance_forbidden(ROUTE_URL, route)
 
     def test_delete_flight_forbidden(self):
-        pass
+        flight, _ = Flight.objects.get_or_create(sample_flight())
+        self.delete_instance_forbidden(FLIGHT_URL, flight)
 
 
 class LogoCompanyUploadTests(TestCase):
