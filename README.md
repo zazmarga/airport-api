@@ -24,7 +24,7 @@ With the ability to arrange ticket booking for registered users.
 
 ### Diagram of Project
 
-[HERE](diagram.png)
+![here](diagram.png)
 
 ### Installing using GitHub
 
@@ -76,9 +76,3 @@ Docker should be installed
  * Calculating the flight duration
  * Managing flights (ex. "is_completed" - True, cannot delete past flights, but its will be displayed at the end of list)
 
-###  Some screenshots of the project
-
-[screenshots1](airport-api1.png)
-[screenshots2](airport-api2.png)
-[screenshots3](airport-api3.png)
-[screenshots4](airport-api4.png)
