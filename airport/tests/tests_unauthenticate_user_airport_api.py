@@ -5,7 +5,21 @@ from rest_framework import status
 from rest_framework.test import APIClient
 
 from user.models import User
-from .urls_and_sample_functions import *
+from airport.tests.urls_and_sample_functions import (
+    COUNTRY_URL, sample_country,
+    CITY_URL,
+    TIMEZONE_URL, sample_time_zone,
+    AIRPORT_URL,
+    FACILITY_URL, sample_facility,
+    TYPE_URL, sample_type,
+    COMPANY_URL,
+    AIRPLANE_URL,
+    ROLE_URL, sample_role,
+    CREW_URL,
+    ROUTE_URL,
+    FLIGHT_URL,
+    ORDER_URL,
+)
 
 from airport.models import (
     Country,
@@ -78,7 +92,6 @@ class UnAuthenticatedApiTest(TestCase):
             user=self.user,
         )
 
-
     def auth_required_list_and_detail(self, url, instance):
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
@@ -124,7 +137,9 @@ class UnAuthenticatedApiTest(TestCase):
             url=COMPANY_URL,
             instance=AirlineCompany.objects.create(
                 name="Iberia",
-                registration_country=Country.objects.get_or_create(name="Spain")[0],
+                registration_country=Country.objects.get_or_create(
+                    name="Spain"
+                )[0],
             )
         )
 
@@ -141,7 +156,9 @@ class UnAuthenticatedApiTest(TestCase):
             airplane_type=self.airplane_type,
             airline_company=AirlineCompany.objects.create(
                 name="Iberia",
-                registration_country=Country.objects.get_or_create(name="Spain")[0],
+                registration_country=Country.objects.get_or_create(
+                    name="Spain"
+                )[0],
             )
         )
         self.auth_required_list_and_detail(

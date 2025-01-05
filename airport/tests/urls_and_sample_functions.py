@@ -1,6 +1,12 @@
 from rest_framework.reverse import reverse
 
-from airport.models import Country, AirportTimeZone, AirplaneType, Facility, Role
+from airport.models import (
+    Country,
+    AirportTimeZone,
+    AirplaneType,
+    Facility,
+    Role
+)
 
 COUNTRY_URL = reverse("airport:country-list")
 CITY_URL = reverse("airport:city-list")
@@ -48,10 +54,10 @@ def sample_facility(**params):
     defaults.update(params)
     return Facility.objects.create(**defaults)
 
+
 def sample_role(**params):
     defaults = {
         "name": "Flight attendant",
     }
     defaults.update(params)
     return Role.objects.create(**defaults)
-

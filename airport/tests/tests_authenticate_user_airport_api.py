@@ -1,14 +1,42 @@
 from datetime import datetime
 
 from django.test import TestCase
-from numpy.ma.core import append
 from rest_framework import status
 from rest_framework.test import APIClient
 
 from django.contrib.auth import get_user_model
 
-from airport.models import Airport, City, Route, AirlineCompany, Airplane, Crew, Flight, Order, Ticket
-from .urls_and_sample_functions import *
+from airport.models import (
+    Airport,
+    City,
+    Route,
+    AirlineCompany,
+    Airplane,
+    Crew,
+    Flight,
+    Order,
+    Ticket,
+    Role,
+    Country,
+    Facility,
+    AirplaneType,
+    AirportTimeZone
+)
+from airport.tests.urls_and_sample_functions import (
+    COUNTRY_URL, sample_country,
+    CITY_URL,
+    TIMEZONE_URL, sample_time_zone,
+    AIRPORT_URL,
+    FACILITY_URL, sample_facility,
+    TYPE_URL, sample_type,
+    COMPANY_URL,
+    AIRPLANE_URL,
+    ROLE_URL, sample_role,
+    CREW_URL,
+    ROUTE_URL,
+    FLIGHT_URL,
+    ORDER_URL,
+)
 from ..serializers import (
     CountrySerializer,
     CityListSerializer,
@@ -181,8 +209,8 @@ class AuthenticatedApiTests(TestCase):
     def list_of_instances(
             self, url, list_instances,
             serializer_class,
-            ordering: bool=False,
-            attrb: str=None
+            ordering: bool = False,
+            attrb: str = None
     ):
         response = self.client.get(url)
         serializer = serializer_class(list_instances, many=True)
@@ -282,7 +310,9 @@ class AuthenticatedApiTests(TestCase):
     def test_airline_company_list_and_retrieve(self):
         company = AirlineCompany.objects.create(
             name="Iberica",
-            registration_country=Country.objects.get_or_create(name="Spain")[0],
+            registration_country=Country.objects.get_or_create(
+                name="Spain"
+            )[0],
         )
         companies = AirlineCompany.objects.all()
 
@@ -296,7 +326,9 @@ class AuthenticatedApiTests(TestCase):
     def test_airplane_list_and_retrieve_with_capacity_and_facilities(self):
         airline_company = AirlineCompany.objects.create(
             name="Iberica",
-            registration_country=Country.objects.get_or_create(name="Spain")[0],
+            registration_country=Country.objects.get_or_create(
+                name="Spain"
+            )[0],
         )
         airplane = Airplane.objects.create(
             name="AB-320",
@@ -573,10 +605,10 @@ class AuthenticatedApiTests(TestCase):
         url = ORDER_URL + f"{order.id}/"
 
         ticket_new = Ticket.objects.create(
-                row=11,
-                seat="B",
-                flight=self.flight,
-                order=order
+            row=11,
+            seat="B",
+            flight=self.flight,
+            order=order
         )
         order.tickets.add(ticket_new)
         response = self.client.get(url)
